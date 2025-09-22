@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Posts - Kids Bike Blog</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🚴 Bike Competition Posts 🚴</h1>
+  </header>
+
+  <main id="blog-container"></main>
+
+  <footer>
+    <p><a href="index.html"><button>Add a Comment 🚴</button></a></p>
+  </footer>
+
+  <script>
+    // Load posts from localStorage
+    function loadPosts() {
+      let posts = JSON.parse(localStorage.getItem("bikePosts")) || [];
+      const container = document.getElementById("blog-container");
+      container.innerHTML = "";
+
+      posts.forEach(post => {
+        const postDiv = document.createElement("div");
+        postDiv.classList.add("post");
+        postDiv.innerHTML = `
+          <h3>${post.name} <small>(${post.date})</small></h3>
+          <p>${post.comment}</p>
+          ${post.image ? `<img src="${post.image}" alt="Uploaded image">` : ""}
+        `;
+        container.appendChild(postDiv);
+      });
+    }
+
+    window.onload = loadPosts;
+  </script>
+</body>
+</html>
