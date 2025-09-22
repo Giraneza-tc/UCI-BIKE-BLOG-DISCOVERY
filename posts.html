@@ -17,26 +17,48 @@
     <p><a href="index.html"><button>Add a Comment 🚴</button></a></p>
   </footer>
 
-  <script>
-    // Load posts from localStorage
-    function loadPosts() {
-      let posts = JSON.parse(localStorage.getItem("bikePosts")) || [];
-      const container = document.getElementById("blog-container");
-      container.innerHTML = "";
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
 
-      posts.forEach(post => {
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDtTVXlkBllv_rjY1odoFiRwfNZRAxhtok",
+      authDomain: "kids-bike-blog.firebaseapp.com",
+      projectId: "kids-bike-blog",
+      storageBucket: "kids-bike-blog.appspot.com",
+      messagingSenderId: "1077290714718",
+      appId: "1:1077290714718:web:433f989fb6580b27a496cf",
+      measurementId: "G-VS06RC02NG"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    const container = document.getElementById("blog-container");
+
+    const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+
+    // Real-time updates
+    onSnapshot(q, (snapshot) => {
+      container.innerHTML = "";
+      snapshot.forEach(doc => {
+        const post = doc.data();
+        const date = post.timestamp?.toDate().toLocaleString() || "";
         const postDiv = document.createElement("div");
         postDiv.classList.add("post");
         postDiv.innerHTML = `
-          <h3>${post.name} <small>(${post.date})</small></h3>
+          <h3>${post.name} <small>(${date})</small></h3>
           <p>${post.comment}</p>
           ${post.image ? `<img src="${post.image}" alt="Uploaded image">` : ""}
         `;
         container.appendChild(postDiv);
       });
-    }
-
-    window.onload = loadPosts;
+    });
   </script>
 </body>
 </html>

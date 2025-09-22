@@ -12,7 +12,6 @@
     <p>Write your post here</p>
   </header>
 
-  <!-- Post Form -->
   <section id="post-form">
     <h2>Create a New Post</h2>
     <input type="text" id="name" placeholder="Your Name"><br><br>
@@ -20,19 +19,73 @@
     <input type="file" id="imageUpload" accept="image/*"><br><br>
     <button onclick="addPost()">Post 🚴</button>
   </section>
-  <section id="post-form">
-  <h2>Create a New Post</h2>
-  <input type="text" id="name" placeholder="Your Name"><br><br>
-  <textarea id="comment" placeholder="Write your comment here..."></textarea><br>
-  <input type="file" id="imageUpload" accept="image/*"><br><br>
-  <button onclick="addPost()">Post 🚴</button>
-</section>
-
 
   <footer>
     <p>After posting, <a href="posts.html">view posts here</a></p>
   </footer>
 
-  <script src="script.js"></script>
+  <!-- Firebase v9+ modular SDK -->
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDtTVXlkBllv_rjY1odoFiRwfNZRAxhtok",
+      authDomain: "kids-bike-blog.firebaseapp.com",
+      projectId: "kids-bike-blog",
+      storageBucket: "kids-bike-blog.appspot.com",
+      messagingSenderId: "1077290714718",
+      appId: "1:1077290714718:web:433f989fb6580b27a496cf",
+      measurementId: "G-VS06RC02NG"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    async function addPost() {
+      const nameInput = document.getElementById("name").value.trim();
+      const name = nameInput || "Anonymous Rider 🚴";
+      const comment = document.getElementById("comment").value.trim();
+      const imageInput = document.getElementById("imageUpload");
+
+      if (!comment) {
+        alert("Please enter a comment!");
+        return;
+      }
+
+      let imageUrl = "";
+
+      // If image is uploaded, store in Firebase Storage
+      if (imageInput.files.length > 0) {
+        const file = imageInput.files[0];
+        const storageRef = ref(storage, 'images/' + Date.now() + '_' + file.name);
+        await uploadBytes(storageRef, file);
+        imageUrl = await getDownloadURL(storageRef);
+      }
+
+      // Save post to Firestore
+      await addDoc(collection(db, "posts"), {
+        name: name,
+        comment: comment,
+        image: imageUrl,
+        timestamp: serverTimestamp()
+      });
+
+      // Clear inputs
+      document.getElementById("name").value = "";
+      document.getElementById("comment").value = "";
+      imageInput.value = "";
+
+      // Redirect to posts page
+      window.location.href = "posts.html";
+    }
+  </script>
 </body>
 </html>
