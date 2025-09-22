@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Posts - Kids Bike Blog</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <header>
@@ -17,11 +17,11 @@
     <p><a href="index.html"><button>Add a Comment 🚴</button></a></p>
   </footer>
 
+  <!-- Firebase SDKs -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ✅ Your Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDtTVXlkBllv_rjY1odoFiRwfNZRAxhtok",
       authDomain: "kids-bike-blog.firebaseapp.com",
@@ -35,24 +35,26 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const container = document.getElementById("blog-container");
-
-    const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-    onSnapshot(q, (snapshot) => {
+    async function loadPosts() {
+      const q = query(collection(db, "bikePosts"), orderBy("date", "desc"));
+      const querySnapshot = await getDocs(q);
+      const container = document.getElementById("blog-container");
       container.innerHTML = "";
-      snapshot.forEach(doc => {
+
+      querySnapshot.forEach((doc) => {
         const post = doc.data();
-        const date = post.timestamp?.toDate().toLocaleString() || "";
         const postDiv = document.createElement("div");
         postDiv.classList.add("post");
         postDiv.innerHTML = `
-          <h3>${post.name} <small>(${date})</small></h3>
+          <h3>${post.name || "Anonymous"} <small>(${post.date?.toDate().toLocaleString() || "just now"})</small></h3>
           <p>${post.comment}</p>
           ${post.image ? `<img src="${post.image}" alt="Uploaded image">` : ""}
         `;
         container.appendChild(postDiv);
       });
-    });
+    }
+
+    window.onload = loadPosts;
   </script>
 </body>
 </html>

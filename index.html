@@ -1,36 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Post - Kids Bike Blog</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kids Bike Blog</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <header>
-    <h1>🚴 Kids Bike Adventures 🚴</h1>
-    <p>Write your post here</p>
+    <h1>🚴 Kids Bike Blog 🚴</h1>
   </header>
 
-  <section id="post-form">
-    <h2>Create a New Post</h2>
-    <input type="text" id="name" placeholder="Your Name"><br><br>
-    <textarea id="comment" placeholder="Write your comment here..."></textarea><br>
-    <input type="file" id="imageUpload" accept="image/*"><br><br>
-    <button onclick="addPost()">Post 🚴</button>
-  </section>
+  <main>
+    <form id="postForm">
+      <label>Name:</label><br/>
+      <input type="text" id="name" required><br/><br/>
+
+      <label>Comment:</label><br/>
+      <textarea id="comment" required></textarea><br/><br/>
+
+      <label>Upload Image:</label><br/>
+      <input type="file" id="imageUpload" accept="image/*"><br/><br/>
+
+      <button type="submit">Post 🚴</button>
+    </form>
+  </main>
 
   <footer>
-    <p>After posting, <a href="posts.html">view posts here</a></p>
+    <p><a href="posts.html">View Posts 🚴</a></p>
   </footer>
 
-  <!-- Firebase v9+ SDK -->
+  <!-- Firebase SDKs -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    // ✅ Your Firebase Config
+    // ✅ Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyDtTVXlkBllv_rjY1odoFiRwfNZRAxhtok",
       authDomain: "kids-bike-blog.firebaseapp.com",
@@ -41,43 +47,41 @@
       measurementId: "G-VS06RC02NG"
     };
 
-    // Init Firebase
+    // ✅ Init Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    async function addPost() {
-      const nameInput = document.getElementById("name").value.trim();
-      const name = nameInput || "Anonymous Rider 🚴";
-      const comment = document.getElementById("comment").value.trim();
-      const imageInput = document.getElementById("imageUpload");
+    // ✅ Handle post form
+    document.getElementById("postForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-      if (!comment) {
-        alert("Please enter a comment!");
-        return;
-      }
+      const name = document.getElementById("name").value;
+      const comment = document.getElementById("comment").value;
+      const imageFile = document.getElementById("imageUpload").files[0];
 
       let imageUrl = "";
-      if (imageInput.files.length > 0) {
-        const file = imageInput.files[0];
-        const storageRef = ref(storage, 'images/' + Date.now() + '_' + file.name);
-        await uploadBytes(storageRef, file);
+      if (imageFile) {
+        const storageRef = ref(storage, "images/" + Date.now() + "-" + imageFile.name);
+        await uploadBytes(storageRef, imageFile);
         imageUrl = await getDownloadURL(storageRef);
       }
 
-      await addDoc(collection(db, "posts"), {
-        name: name,
-        comment: comment,
-        image: imageUrl,
-        timestamp: serverTimestamp()
-      });
+      try {
+        await addDoc(collection(db, "bikePosts"), {
+          name: name,
+          comment: comment,
+          image: imageUrl,
+          date: serverTimestamp()
+        });
 
-      document.getElementById("name").value = "";
-      document.getElementById("comment").value = "";
-      imageInput.value = "";
-
-      window.location.href = "posts.html";
-    }
+        alert("✅ Post added!");
+        document.getElementById("postForm").reset();
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        alert("❌ Failed to post. Check console.");
+      }
+    });
   </script>
 </body>
 </html>
