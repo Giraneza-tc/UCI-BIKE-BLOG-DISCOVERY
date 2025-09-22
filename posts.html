@@ -18,12 +18,10 @@
   </footer>
 
   <script type="module">
-    // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
 
-    // Firebase config
+    // ✅ Your Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDtTVXlkBllv_rjY1odoFiRwfNZRAxhtok",
       authDomain: "kids-bike-blog.firebaseapp.com",
@@ -34,16 +32,12 @@
       measurementId: "G-VS06RC02NG"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const db = getFirestore(app);
 
     const container = document.getElementById("blog-container");
 
     const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-
-    // Real-time updates
     onSnapshot(q, (snapshot) => {
       container.innerHTML = "";
       snapshot.forEach(doc => {
